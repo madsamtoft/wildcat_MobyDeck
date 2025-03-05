@@ -1,13 +1,11 @@
 target/
+/target/*
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
 ### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+/.idea/*
 *.iws
 *.iml
 *.ipr
@@ -45,12 +43,11 @@ build/
 
 ### Scala ###
 .bsp/
+/.bsp/*
 
 /project/*
-/.idea/*
-/.bsp/*
+
 /risc-v-lab/*
-/target/*
 /test_run_dir/*
 
 /project/target/config-classes/$004e21a0fa7b289a86b2$.class
