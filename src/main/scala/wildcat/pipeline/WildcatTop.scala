@@ -19,6 +19,8 @@ class WildcatTop(file: String) extends Module {
     val led = Output(UInt(16.W))
     val tx = Output(UInt(1.W))
     val rx = Input(UInt(1.W))
+    val sw = Input(UInt(16.W))
+    val btn = Input(UInt(4.W))
   })
 
   val (memory, start) = Util.getCode(file)
@@ -46,6 +48,15 @@ class WildcatTop(file: String) extends Module {
   // bit 1 RX data available (RDF)
   // 0xf000_0004 send and receive register
 
+  // LEDs:
+  // 0xf001_0000
+
+  // Switches:
+  // 0xf002_0000
+
+  // Buttons:
+  // 0xf003_0000
+
   val tx = Module(new BufferedTx(100000000, 115200))
   val rx = Module(new Rx(100000000, 115200))
   io.tx := tx.io.txd
@@ -57,27 +68,35 @@ class WildcatTop(file: String) extends Module {
 
   val uartStatusReg = RegNext(rx.io.channel.valid ## tx.io.channel.ready)
   val memAddressReg = RegNext(cpu.io.dmem.rdAddress)
-  when (memAddressReg(31, 28) === 0xf.U && memAddressReg(19,16) === 0.U) {
-    when (memAddressReg(3, 0) === 0.U) {
-      cpu.io.dmem.rdData := uartStatusReg
-    } .elsewhen(memAddressReg(3, 0) === 4.U) {
-      cpu.io.dmem.rdData := rx.io.channel.bits
-      rx.io.channel.ready := cpu.io.dmem.rdEnable
+  val switchReg = RegNext(io.sw)
+  val buttonReg = RegNext(io.btn)
+  when (memAddressReg(31, 28) === 0xf.U) {  // MM-input
+    when (memAddressReg(19,16) === 0.U) {   // Uart
+      when (memAddressReg(3, 0) === 0.U) {
+        cpu.io.dmem.rdData := uartStatusReg
+      } .elsewhen(memAddressReg(3, 0) === 4.U) {
+        cpu.io.dmem.rdData := rx.io.channel.bits
+        rx.io.channel.ready := cpu.io.dmem.rdEnable
+      }
+    } .elsewhen(memAddressReg(19,16) === 2.U) { // Switches
+      cpu.io.dmem.rdData := switchReg
+    } .elsewhen(memAddressReg(19,16) === 3.U) { // Buttons
+      cpu.io.dmem.rdData := buttonReg
     }
   }
 
-  val ledReg = RegInit(0.U(8.W))
+  val ledReg = RegInit(0.U(16.W))
   when ((cpu.io.dmem.wrAddress(31, 28) === 0xf.U) && cpu.io.dmem.wrEnable(0)) {
     when (cpu.io.dmem.wrAddress(19,16) === 0.U && cpu.io.dmem.wrAddress(3, 0) === 4.U) {
       printf(" %c %d\n", cpu.io.dmem.wrData(7, 0), cpu.io.dmem.wrData(7, 0))
       tx.io.channel.valid := true.B
     } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 1.U) {
-      ledReg := cpu.io.dmem.wrData(7, 0)
+      ledReg := cpu.io.dmem.wrData(15, 0)
     }
     dmem.io.wrEnable := VecInit(Seq.fill(4)(false.B))
   }
 
-  io.led := 1.U ## 0.U(7.W) ## RegNext(ledReg)
+  io.led := RegNext(ledReg)
 }
 
 object WildcatTop extends App {
