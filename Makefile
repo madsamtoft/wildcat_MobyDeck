@@ -50,6 +50,9 @@ sim-test:
 hw: app
 	$(SBT) "runMain wildcat.pipeline.WildcatTop a.out"
 
+hw-elf:
+	$(SBT) "runMain wildcat.pipeline.WildcatTop $(APP)"
+
 hw-fmax:
 	$(SBT) "runMain wildcat.pipeline.SynthTopFmax a.out"
 
