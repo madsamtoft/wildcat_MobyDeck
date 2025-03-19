@@ -21,7 +21,10 @@ class WildcatTop(file: String) extends Module {
     val rx = Input(UInt(1.W))
     val sw = Input(UInt(16.W))
     val btn = Input(UInt(4.W))
+    val PS2_CLK = Input(UInt(1.W))
+    val PS2_DATA = Input(UInt(11.W))
   })
+
 
   val (memory, start) = Util.getCode(file)
 
@@ -57,6 +60,9 @@ class WildcatTop(file: String) extends Module {
   // Buttons:
   // 0xf003_0000
 
+  //Gamepad (PS2_DATA):
+  //0xf004_0000
+
   val tx = Module(new BufferedTx(100000000, 115200))
   val rx = Module(new Rx(100000000, 115200))
   io.tx := tx.io.txd
@@ -70,6 +76,7 @@ class WildcatTop(file: String) extends Module {
   val memAddressReg = RegNext(cpu.io.dmem.rdAddress)
   val switchReg = RegNext(io.sw)
   val buttonReg = RegNext(io.btn)
+  val gamepadReg = RegNext(io.PS2_DATA)
   when (memAddressReg(31, 28) === 0xf.U) {  // MM-input
     when (memAddressReg(19,16) === 0.U) {   // Uart
       when (memAddressReg(3, 0) === 0.U) {
@@ -82,6 +89,8 @@ class WildcatTop(file: String) extends Module {
       cpu.io.dmem.rdData := switchReg
     } .elsewhen(memAddressReg(19,16) === 3.U) { // Buttons
       cpu.io.dmem.rdData := buttonReg
+    } . elsewhen(memAddressReg(19,16) === 4.U) { // Gamepad
+      cpu.io.dmem.rdData := gamepadReg
     }
   }
 
