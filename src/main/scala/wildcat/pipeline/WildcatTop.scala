@@ -63,6 +63,9 @@ class WildcatTop(file: String) extends Module {
   //Gamepad (PS2_DATA):
   //0xf004_0000
 
+  //VGA:
+  //0xf005_0000
+
   val tx = Module(new BufferedTx(100000000, 115200))
   val rx = Module(new Rx(100000000, 115200))
   io.tx := tx.io.txd
@@ -89,18 +92,21 @@ class WildcatTop(file: String) extends Module {
       cpu.io.dmem.rdData := switchReg
     } .elsewhen(memAddressReg(19,16) === 3.U) { // Buttons
       cpu.io.dmem.rdData := buttonReg
-    } . elsewhen(memAddressReg(19,16) === 4.U) { // Gamepad
+    } .elsewhen(memAddressReg(19,16) === 4.U) { // Gamepad
       cpu.io.dmem.rdData := gamepadReg
     }
   }
 
   val ledReg = RegInit(0.U(16.W))
+  val vgaReg = RegInit(0.U(32.W))
   when ((cpu.io.dmem.wrAddress(31, 28) === 0xf.U) && cpu.io.dmem.wrEnable(0)) {
     when (cpu.io.dmem.wrAddress(19,16) === 0.U && cpu.io.dmem.wrAddress(3, 0) === 4.U) {
       printf(" %c %d\n", cpu.io.dmem.wrData(7, 0), cpu.io.dmem.wrData(7, 0))
       tx.io.channel.valid := true.B
-    } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 1.U) {
+    } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 1.U) { // LED
       ledReg := cpu.io.dmem.wrData(15, 0)
+    } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 5.U) { // VGA
+
     }
     dmem.io.wrEnable := VecInit(Seq.fill(4)(false.B))
   }
