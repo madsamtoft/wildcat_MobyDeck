@@ -22,7 +22,7 @@ class WildcatTop(file: String) extends Module {
     val sw = Input(UInt(16.W))
     val btn = Input(UInt(4.W))
     val PS2_CLK = Input(UInt(1.W))
-    val PS2_DATA = Input(UInt(11.W))
+    val PS2_DATA = Input(UInt(1.W))
   })
 
 

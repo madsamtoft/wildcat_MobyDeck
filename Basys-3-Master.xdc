@@ -135,8 +135,8 @@ set_property -dict { PACKAGE_PIN A18   IOSTANDARD LVCMOS33 } [get_ports { io_tx 
 
 
 ##USB HID (PS/2)
-#set_property -dict { PACKAGE_PIN C17   IOSTANDARD LVCMOS33   PULLUP true } [get_ports PS2Clk]
-#set_property -dict { PACKAGE_PIN B17   IOSTANDARD LVCMOS33   PULLUP true } [get_ports PS2Data]
+set_property -dict { PACKAGE_PIN C17   IOSTANDARD LVCMOS33   PULLUP true } [get_ports io_PS2_CLK]
+set_property -dict { PACKAGE_PIN B17   IOSTANDARD LVCMOS33   PULLUP true } [get_ports io_PS2_DATA]
 
 
 ##Quad SPI Flash
