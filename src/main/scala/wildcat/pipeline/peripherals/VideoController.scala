@@ -11,28 +11,30 @@ class VGA extends Bundle {
   val Vsync = Output(Bool())
 }
 
-class VideoController(start: Int, size: Int, freq: Int) extends Module {
+class VideoController(size: Int, freq: Int) extends Module {
   val io = IO(new Bundle {
-    val bus = Flipped(new Bus())
+    // val bus = Flipped(new Bus())
+    val data = Input(UInt(32.W))
+    val address = Input(UInt(32.W))
+    val write = Input(Bool())
     val vga = new VGA()
   })
 
-  val Y_WIDTH = 8
-  val X_WIDTH = 9
+  // 320(9) x 240(8) (2x downscale)
+  // 160(8) x 120(7) (4x downscale)
+  val X_WIDTH = 8
+  val Y_WIDTH = 7
+  val DOWNSCALE = 4
 
   val MEM_SIZE = 1 << (Y_WIDTH + X_WIDTH)
-  val mem = SyncReadMem(MEM_SIZE, UInt(6.W))
+  val mem = SyncReadMem(MEM_SIZE, UInt(6.W)) // 6.W for color depth
 
-  val width = log2Up(size) // 20
-  val page = io.bus.addr(31,width) // 0x1
-  val index = io.bus.addr(width - 1,0) // 0
-  val write = io.bus.writeWord | io.bus.writeHalf | io.bus.writeByte
-  when (write && (page === (start/size).U)) {
-    mem.write(index, io.bus.writeData(5,0))
+  val width = log2Up(size) // 16
+  val index = io.address(width - 1, 0) //
+  val write = io.write
+  when (write) {
+    mem.write(index, io.data(5,0))
   }
-
-  io.bus.readValid := false.B
-  io.bus.readData := 0.U
 
   //VGA parameters
   val VGA_H_DISPLAY_SIZE = 640
@@ -72,8 +74,8 @@ class VideoController(start: Int, size: Int, freq: Int) extends Module {
   val Vsync = (CounterYReg < (VGA_V_DISPLAY_SIZE + VGA_V_FRONT_PORCH_SIZE).U || (CounterYReg >= (VGA_V_DISPLAY_SIZE + VGA_V_FRONT_PORCH_SIZE + VGA_V_SYNC_PULSE_SIZE).U))
 
   val inDisplayArea = (CounterXReg < VGA_H_DISPLAY_SIZE.U) && (CounterYReg < VGA_V_DISPLAY_SIZE.U)
-  val pixelX = CounterXReg(9,1)
-  val pixelY = CounterYReg(9,1)
+  val pixelX = CounterXReg(9,log2Up(DOWNSCALE))
+  val pixelY = CounterYReg(9,log2Up(DOWNSCALE))
 
   val pixel = mem.read(pixelY(Y_WIDTH - 1,0) ## pixelX(X_WIDTH - 1,0))
 

@@ -2,8 +2,8 @@ package wildcat.pipeline
 
 import chisel3._
 import wildcat.Util
-
 import chisel.lib.uart._
+import wildcat.pipeline.peripherals._
 
 /*
  * This file is part of the RISC-V processor Wildcat.
@@ -23,6 +23,7 @@ class WildcatTop(file: String) extends Module {
     val btn = Input(UInt(4.W))
     val PS2_CLK = Input(UInt(1.W))
     val PS2_DATA = Input(UInt(1.W))
+    val vga = new VGA()
   })
 
 
@@ -64,7 +65,7 @@ class WildcatTop(file: String) extends Module {
   //0xf004_0000
 
   //VGA:
-  //0xf005_0000
+  //0xf005_0000 - 0xf005_ffff
 
   val tx = Module(new BufferedTx(100000000, 115200))
   val rx = Module(new Rx(100000000, 115200))
@@ -74,6 +75,8 @@ class WildcatTop(file: String) extends Module {
   tx.io.channel.bits := cpu.io.dmem.wrData(7, 0)
   tx.io.channel.valid := false.B
   rx.io.channel.ready := false.B
+
+
 
   val uartStatusReg = RegNext(rx.io.channel.valid ## tx.io.channel.ready)
   val memAddressReg = RegNext(cpu.io.dmem.rdAddress)
@@ -97,8 +100,19 @@ class WildcatTop(file: String) extends Module {
     }
   }
 
+  // Video controller
+  val video = Module(new VideoController(0x10000, 100000000))
+  val vgaDataReg = RegInit(0.U(32.W))
+  val vgaAddressReg = RegInit(0.U(32.W))
+  val vgaWriteReg = Reg(Bool())
+  vgaWriteReg := false.B
+  video.io.data := vgaDataReg
+  video.io.address := vgaAddressReg
+  video.io.write := vgaWriteReg
+
+  //
   val ledReg = RegInit(0.U(16.W))
-  val vgaReg = RegInit(0.U(32.W))
+
   when ((cpu.io.dmem.wrAddress(31, 28) === 0xf.U) && cpu.io.dmem.wrEnable(0)) {
     when (cpu.io.dmem.wrAddress(19,16) === 0.U && cpu.io.dmem.wrAddress(3, 0) === 4.U) {
       printf(" %c %d\n", cpu.io.dmem.wrData(7, 0), cpu.io.dmem.wrData(7, 0))
@@ -106,12 +120,15 @@ class WildcatTop(file: String) extends Module {
     } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 1.U) { // LED
       ledReg := cpu.io.dmem.wrData(15, 0)
     } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 5.U) { // VGA
-
+      vgaDataReg := cpu.io.dmem.wrData
+      vgaAddressReg := cpu.io.dmem.wrAddress
+      vgaWriteReg := true.B
     }
     dmem.io.wrEnable := VecInit(Seq.fill(4)(false.B))
   }
 
   io.led := RegNext(ledReg)
+  io.vga := video.io.vga
 }
 
 object WildcatTop extends App {
