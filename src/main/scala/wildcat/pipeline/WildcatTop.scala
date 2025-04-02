@@ -2,8 +2,8 @@ package wildcat.pipeline
 
 import chisel3._
 import wildcat.Util
-
 import chisel.lib.uart._
+import wildcat.pipeline.peripherals.PS2Receiver
 
 /*
  * This file is part of the RISC-V processor Wildcat.
@@ -39,6 +39,13 @@ class WildcatTop(file: String) extends Module {
   cpu.io.imem.data := imem.io.data
   cpu.io.imem.stall := imem.io.stall
   // TODO: stalling
+
+
+  //Testing ps2 module :)
+  val ps2 = Module(new PS2Receiver)
+  ps2.io.kdata := io.PS2_DATA
+  ps2.io.kclk := io.PS2_CLK
+  val ps2Reg = ps2.io.keycode
 
 
   // Here IO stuff
@@ -79,7 +86,6 @@ class WildcatTop(file: String) extends Module {
   val memAddressReg = RegNext(cpu.io.dmem.rdAddress)
   val switchReg = RegNext(io.sw)
   val buttonReg = RegNext(io.btn)
-  val gamepadReg = RegNext(io.PS2_DATA)
   when (memAddressReg(31, 28) === 0xf.U) {  // MM-input
     when (memAddressReg(19,16) === 0.U) {   // Uart
       when (memAddressReg(3, 0) === 0.U) {
@@ -92,8 +98,8 @@ class WildcatTop(file: String) extends Module {
       cpu.io.dmem.rdData := switchReg
     } .elsewhen(memAddressReg(19,16) === 3.U) { // Buttons
       cpu.io.dmem.rdData := buttonReg
-    } .elsewhen(memAddressReg(19,16) === 4.U) { // Gamepad
-      cpu.io.dmem.rdData := gamepadReg
+    } .elsewhen(memAddressReg(19,16) === 4.U) { // ps2Data
+      cpu.io.dmem.rdData := ps2Reg
     }
   }
 
