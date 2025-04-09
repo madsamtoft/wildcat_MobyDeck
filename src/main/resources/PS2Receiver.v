@@ -24,31 +24,29 @@ module PS2Receiver(
     input clk,
     input kclk,
     input kdata,
-    output reg[15:0] keycode = 0,
-    output reg oflag
+    output [31:0] keycodeout
     );
 
-    wire kclkf, kdataf;
-    reg[7:0] datacur = 0;
-    reg[7:0] dataprev = 0;
-    reg[3:0] cnt = 0;
-    reg flag=0;
 
-debouncer #(
-    .COUNT_MAX(19),
-    .COUNT_WIDTH(5)
-) db_clk(
+    wire kclkf, kdataf;
+    reg [7:0]datacur;
+    reg [7:0]dataprev;
+    reg [3:0]cnt;
+    reg [31:0]keycode;
+    reg flag;
+
+    initial begin
+        keycode[31:0]<=0'h00000000;
+        cnt<=4'b0000;
+        flag<=1'b0;
+    end
+
+debouncer debounce(
     .clk(clk),
-    .I(kclk),
-    .O(kclkf)
-);
-debouncer #(
-   .COUNT_MAX(19),
-   .COUNT_WIDTH(5)
-) db_data(
-    .clk(clk),
-    .I(kdata),
-    .O(kdataf)
+    .I0(kclk),
+    .I1(kdata),
+    .O0(kclkf),
+    .O1(kdataf)
 );
 
 always@(negedge(kclkf))begin
@@ -68,17 +66,19 @@ always@(negedge(kclkf))begin
     endcase
         if(cnt<=9) cnt<=cnt+1;
         else if(cnt==10) cnt<=0;
+
 end
 
-reg pflag;
-always@(posedge clk) begin
-    if (flag == 1'b1 && pflag == 1'b0) begin
-        keycode <= {dataprev, datacur};
-        oflag <= 1'b1;
-        dataprev <= datacur;
-    end else
-        oflag <= 'b0;
-    pflag <= flag;
+always @(posedge flag)begin
+    if (dataprev!=datacur)begin
+        keycode[31:24]<=keycode[23:16];
+        keycode[23:16]<=keycode[15:8];
+        keycode[15:8]<=dataprev;
+        keycode[7:0]<=datacur;
+        dataprev<=datacur;
+    end
 end
+
+assign keycodeout=keycode;
 
 endmodule

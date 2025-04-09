@@ -7,10 +7,10 @@ import chisel3.util._
 
 class PS2Receiver extends BlackBox with HasBlackBoxResource {
   val io = IO(new Bundle {
+    val clk = Input(Clock())
     val kclk = Input(Bool())
     val kdata = Input(Bool())
-    val keycode = Output(UInt(16.W))
-    val oflag = Output(Bool())
+    val keycodeout = Output(UInt(16.W))
   })
   addResource("/PS2Receiver.v")
 }

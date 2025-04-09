@@ -43,9 +43,23 @@ class WildcatTop(file: String) extends Module {
 
   //Testing ps2 module :)
   val ps2 = Module(new PS2Receiver)
+  val ps2_keycode = RegInit(0.U(16.W))
+  val ps2_press = RegInit(false.B)
+  ps2.io.clk := clock
   ps2.io.kdata := io.PS2_DATA
   ps2.io.kclk := io.PS2_CLK
-  val ps2Reg = ps2.io.keycode
+  ps2_keycode := ps2.io.keycodeout
+
+  when(ps2_keycode === 0xF0.U) {
+    ps2_press := false.B
+    ps2_keycode := 0x00.U
+  } .elsewhen(ps2_keycode =/= 0x00.U) {
+    ps2_press := true.B
+  }
+
+
+
+
 
 
   // Here IO stuff
@@ -99,7 +113,7 @@ class WildcatTop(file: String) extends Module {
     } .elsewhen(memAddressReg(19,16) === 3.U) { // Buttons
       cpu.io.dmem.rdData := buttonReg
     } .elsewhen(memAddressReg(19,16) === 4.U) { // ps2Data
-      cpu.io.dmem.rdData := ps2Reg
+      cpu.io.dmem.rdData := ps2_keycode //## ps2_press
     }
   }
 
