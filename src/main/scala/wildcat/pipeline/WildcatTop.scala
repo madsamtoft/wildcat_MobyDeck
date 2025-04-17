@@ -65,7 +65,7 @@ class WildcatTop(file: String) extends Module {
   //0xf004_0000
 
   //VGA:
-  //0xf005_0000 - 0xf005_ffff
+  //0xf010_0000
 
   val tx = Module(new BufferedTx(100000000, 115200))
   val rx = Module(new Rx(100000000, 115200))
@@ -84,24 +84,25 @@ class WildcatTop(file: String) extends Module {
   val buttonReg = RegNext(io.btn)
   val gamepadReg = RegNext(io.PS2_DATA)
   when (memAddressReg(31, 28) === 0xf.U) {  // MM-input
-    when (memAddressReg(19,16) === 0.U) {   // Uart
+    when (memAddressReg(27,16) === 0.U) {   // Uart
       when (memAddressReg(3, 0) === 0.U) {
         cpu.io.dmem.rdData := uartStatusReg
       } .elsewhen(memAddressReg(3, 0) === 4.U) {
         cpu.io.dmem.rdData := rx.io.channel.bits
         rx.io.channel.ready := cpu.io.dmem.rdEnable
       }
-    } .elsewhen(memAddressReg(19,16) === 2.U) { // Switches
+    } .elsewhen(memAddressReg(27,16) === 2.U) { // Switches
       cpu.io.dmem.rdData := switchReg
-    } .elsewhen(memAddressReg(19,16) === 3.U) { // Buttons
+    } .elsewhen(memAddressReg(27,16) === 3.U) { // Buttons
       cpu.io.dmem.rdData := buttonReg
-    } .elsewhen(memAddressReg(19,16) === 4.U) { // Gamepad
+    } .elsewhen(memAddressReg(27,16) === 4.U) { // Gamepad
       cpu.io.dmem.rdData := gamepadReg
     }
   }
 
   // Video controller
-  val video = Module(new VideoController(0x10000, 100000000))
+  val DOWNSCALE_4x = false // true is 160x120, false is 320x240
+  val video = Module(new VideoController(DOWNSCALE_4x, 100000000))
   val vgaDataReg = RegInit(0.U(32.W))
   val vgaAddressReg = RegInit(0.U(32.W))
   val vgaWriteReg = Reg(Bool())
@@ -114,12 +115,12 @@ class WildcatTop(file: String) extends Module {
   val ledReg = RegInit(0.U(16.W))
 
   when ((cpu.io.dmem.wrAddress(31, 28) === 0xf.U) && cpu.io.dmem.wrEnable(0)) {
-    when (cpu.io.dmem.wrAddress(19,16) === 0.U && cpu.io.dmem.wrAddress(3, 0) === 4.U) {
+    when (cpu.io.dmem.wrAddress(27,16) === 0.U && cpu.io.dmem.wrAddress(3, 0) === 4.U) {
       printf(" %c %d\n", cpu.io.dmem.wrData(7, 0), cpu.io.dmem.wrData(7, 0))
       tx.io.channel.valid := true.B
-    } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 1.U) { // LED
+    } .elsewhen (cpu.io.dmem.wrAddress(27,16) === 1.U) { // LED
       ledReg := cpu.io.dmem.wrData(15, 0)
-    } .elsewhen (cpu.io.dmem.wrAddress(19,16) === 5.U) { // VGA
+    } .elsewhen (cpu.io.dmem.wrAddress(27,20) === "x01".U) { // VGA
       vgaDataReg := cpu.io.dmem.wrData
       vgaAddressReg := cpu.io.dmem.wrAddress
       vgaWriteReg := true.B

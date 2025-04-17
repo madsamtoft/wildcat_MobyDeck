@@ -11,7 +11,7 @@ class VGA extends Bundle {
   val Vsync = Output(Bool())
 }
 
-class VideoController(size: Int, freq: Int) extends Module {
+class VideoController(downscaleDouble: Boolean, freq: Int) extends Module {
   val io = IO(new Bundle {
     // val bus = Flipped(new Bus())
     val data = Input(UInt(32.W))
@@ -22,14 +22,15 @@ class VideoController(size: Int, freq: Int) extends Module {
 
   // 320(9) x 240(8) (2x downscale)
   // 160(8) x 120(7) (4x downscale)
-  val X_WIDTH = 8
-  val Y_WIDTH = 7
-  val DOWNSCALE = 4
+  val X_WIDTH = if (downscaleDouble)    8       else 9
+  val Y_WIDTH = if (downscaleDouble)    7       else 8
+  val DOWNSCALE = if (downscaleDouble)  4       else 2
+  val SIZE = if (downscaleDouble)       0x10000 else 0x100000
 
   val MEM_SIZE = 1 << (Y_WIDTH + X_WIDTH)
   val mem = SyncReadMem(MEM_SIZE, UInt(6.W)) // 6.W for color depth
 
-  val width = log2Up(size) // 16
+  val width = log2Up(SIZE) // 16
   val index = io.address(width - 1, 0) //
   val write = io.write
   when (write) {

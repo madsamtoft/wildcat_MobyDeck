@@ -1,14 +1,14 @@
 .text
 .global _start
 _start:
-li s0, 160 # max x-value
-li s1, 120 # max y-value
+li s0, 320 # max x-value
+li s1, 240 # max y-value
 
-li s4, -120 # initial x offset
-li s5, -60 # initial y offset
+li s4, -240 # initial x offset
+li s5, -120 # initial y offset
 
 li s6, 32 # move amount
-li s7, 5 # zoom amount
+li s7, 6 # zoom amount
 li s8, 64 # max iterations
 
 clear_screen:
@@ -95,7 +95,7 @@ beq x0, x0, wait_for_input
 check_for_input:
 li t0, 0xf0030000  # Btn address
 lw t1, 0(t0)   # Read board buttons
-srli t1, t1, 4
+# srli t1, t1, 4
 lw t2, 4(t0)   # Read Pmod buttons
 # li t0, 0
 andi t2, t2, 0xf0
@@ -178,13 +178,10 @@ mv ra, a4
 jalr x0, 0(ra)
 
 display:
-li t0, 0xf0050000  # start of video memory
-mv t2, a0
+li t0, 0xf0100000  # start of video memory
 mv t1, a1        # address = a1 << 10 + a0 + t0 
-andi t2, t2, 0xff
-andi t1, t1, 0x7f
-slli t1, t1, 8
-add t1, t1, t2
+slli t1, t1, 9
+add t1, t1, a0
 add t1, t1, t0
 sw a2, 0(t1)
 jalr x0, 0(ra)
