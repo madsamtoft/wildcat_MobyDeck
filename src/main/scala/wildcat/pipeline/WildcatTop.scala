@@ -42,6 +42,27 @@ class WildcatTop(file: String) extends Module {
   // TODO: stalling
 
 
+  //Testing ps2 module :)
+  val ps2 = Module(new PS2Receiver)
+  val ps2_keycode = RegInit(0.U(16.W))
+  val ps2_press = RegInit(false.B)
+  ps2.io.clk := clock
+  ps2.io.kdata := io.PS2_DATA
+  ps2.io.kclk := io.PS2_CLK
+  ps2_keycode := ps2.io.keycodeout
+
+  when(ps2_keycode === 0xF0.U) {
+    ps2_press := false.B
+    ps2_keycode := 0x00.U
+  } .elsewhen(ps2_keycode =/= 0x00.U) {
+    ps2_press := true.B
+  }
+
+
+
+
+
+
   // Here IO stuff
   // IO is mapped ot 0xf000_0000
   // use lower bits to select IOs
@@ -76,13 +97,10 @@ class WildcatTop(file: String) extends Module {
   tx.io.channel.valid := false.B
   rx.io.channel.ready := false.B
 
-
-
   val uartStatusReg = RegNext(rx.io.channel.valid ## tx.io.channel.ready)
   val memAddressReg = RegNext(cpu.io.dmem.rdAddress)
   val switchReg = RegNext(io.sw)
   val buttonReg = RegNext(io.btn)
-  val gamepadReg = RegNext(io.PS2_DATA)
   when (memAddressReg(31, 28) === 0xf.U) {  // MM-input
     when (memAddressReg(27,16) === 0.U) {   // Uart
       when (memAddressReg(3, 0) === 0.U) {
@@ -95,8 +113,8 @@ class WildcatTop(file: String) extends Module {
       cpu.io.dmem.rdData := switchReg
     } .elsewhen(memAddressReg(27,16) === 3.U) { // Buttons
       cpu.io.dmem.rdData := buttonReg
-    } .elsewhen(memAddressReg(27,16) === 4.U) { // Gamepad
-      cpu.io.dmem.rdData := gamepadReg
+    } .elsewhen(memAddressReg(27,16) === 4.U) { // ps2Data
+      cpu.io.dmem.rdData := ps2_keycode //## ps2_press
     }
   }
 
