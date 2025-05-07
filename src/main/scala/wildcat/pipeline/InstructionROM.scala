@@ -12,10 +12,10 @@ class InstructionROM(code: Array[Int]) extends Module {
   addrReg := io.address
 
   val codeSeq = code.toIndexedSeq.map(_.S(32.W).asUInt)
-  val codeSeqAppend = IndexedSeq.fill(512 - codeSeq.length)(0.U(32.W))
-  val codeFinal = codeSeq ++ codeSeqAppend
+//  val codeSeqAppend = IndexedSeq.fill(512 - codeSeq.length)(0.U(32.W))
+//  val codeFinal = codeSeq ++ codeSeqAppend
 
-  val instructions = RegInit(VecInit(codeFinal))
+  val instructions = VecInit(codeSeq)
   io.data := instructions(addrReg(31, 2))
   // for checking two failing tests
   val toggle = RegInit(false.B)

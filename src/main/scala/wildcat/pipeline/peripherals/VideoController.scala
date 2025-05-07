@@ -30,8 +30,8 @@ class VideoController(downscaleDouble: Boolean, freq: Int) extends Module {
   val MEM_SIZE = 1 << (Y_WIDTH + X_WIDTH)
   val mem = SyncReadMem(MEM_SIZE, UInt(6.W)) // 6.W for color depth
 
-  val width = log2Up(SIZE) // 16
-  val index = io.address(width - 1, 0) //
+  val width = log2Up(SIZE)
+  val index = io.address(width - 1, 0)
   val write = io.write
   when (write) {
     mem.write(index, io.data(5,0))
