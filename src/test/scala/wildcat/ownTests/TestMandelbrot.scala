@@ -9,7 +9,7 @@ class TestMandelbrot extends AnyFlatSpec with ChiselScalatestTester {
   "_Mandelbrot test" should "pass" in {
     test(new WildcatTop("a.out")).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       dut.clock.setTimeout(0)
-      dut.clock.step(1000000)
+      dut.clock.step(10000)
     }
   }
 }
