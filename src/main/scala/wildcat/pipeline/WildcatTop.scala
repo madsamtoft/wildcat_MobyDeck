@@ -51,12 +51,14 @@ class WildcatTop(file: String) extends Module {
   ps2.io.kclk := io.PS2_CLK
   ps2_keycode := ps2.io.keycodeout
 
+  /* !!! This MIGHT be needed later on !!!
   when(ps2_keycode === 0xF0.U) {
     ps2_press := false.B
     ps2_keycode := 0x00.U
   } .elsewhen(ps2_keycode =/= 0x00.U) {
     ps2_press := true.B
   }
+  */
 
 
 
