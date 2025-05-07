@@ -56,10 +56,10 @@ test-all-own: app
 	$(SBT) "testOnly wildcat.ownTests.*" # Won't work because a.out is the same for all
 
 hw: app
-	$(SBT) "runMain wildcat.pipeline.WildcatTop a.out"
+	$(SBT) "runMain wildcat.pipeline.Top a.out"
 
 hw-elf:
-	$(SBT) "runMain wildcat.pipeline.WildcatTop $(APP)"
+	$(SBT) "runMain wildcat.pipeline.Top $(APP)"
 
 hw-fmax:
 	$(SBT) "runMain wildcat.pipeline.SynthTopFmax a.out"
@@ -75,14 +75,14 @@ synpath:
 	source /home/shared/Xilinx/Vivado/2017.4/settings64.sh
 
 synth:
-	./vivado_synth.sh -t WildcatTop -p xc7a100tcsg324-1 -x nexysA7.xdc -o build generated/WildcatTop.v
+	./vivado_synth.sh -t Top -p xc7a100tcsg324-1 -x nexysA7.xdc -o build generated/Top.v
 
 synth-fmax:
 	./vivado_synth.sh -t SynthTopFmax -p xc7a100tcsg324-1 -x nexysA7.xdc -o build generated/SynthTopFmax.v
 
 cp-bit:
 	-mkdir build
-	scp masca@chipdesign1.compute.dtu.dk:~/source/wildcat/build/WildcatTop.bit build
+	scp masca@chipdesign1.compute.dtu.dk:~/source/wildcat/build/Top.bit build
 
 gen-uart:
 	$(SBT) "runMain wildcat.explore.UartTop"

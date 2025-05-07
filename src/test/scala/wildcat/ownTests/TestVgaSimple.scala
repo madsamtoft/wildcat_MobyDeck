@@ -2,12 +2,14 @@ package wildcat.ownTests
 
 import chisel3._
 import chiseltest._
+import chiseltest.simulator.VerilatorBackendAnnotation
+import chiseltest.simulator.VerilatorFlags
 import org.scalatest.flatspec.AnyFlatSpec
 import wildcat.pipeline._
 
 class TestVgaSimple extends AnyFlatSpec with ChiselScalatestTester {
   "_VgaSimple test" should "pass" in {
-    test(new WildcatTop("../SoC_project/out/vga_simple.out")).withAnnotations(Seq(WriteVcdAnnotation, VerilatorBackendAnnotation)) { dut =>
+    test(new WildcatTop("../SoC_project/out/vga_simple.out")).withAnnotations(Seq(WriteVcdAnnotation, VerilatorBackendAnnotation, VerilatorFlags(Seq("-CFLAGS", "-std=c++14")))) { dut =>
       dut.clock.setTimeout(0)
       dut.io.sw.poke("b001000".U)
       dut.clock.step(6000)
