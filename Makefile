@@ -6,6 +6,8 @@
 
 SBT = sbt
 
+TEST = TestOwn
+
 APP=asm/play.s
 #APP=asm/riscv-v1_addi.s
 # Use a different program, e.g., one from the CAE lab
@@ -46,6 +48,9 @@ test: risc-v-lab
 
 sim-test:
 	sbt "testOnly wildcat.SimulatorTest"
+
+test-asm: app
+	$(SBT) "testOnly wildcat.ownTests.$(TEST)"
 
 hw: app
 	$(SBT) "runMain wildcat.pipeline.WildcatTop a.out"
