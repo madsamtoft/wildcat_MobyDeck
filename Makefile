@@ -52,6 +52,9 @@ sim-test:
 test-asm: app
 	$(SBT) "testOnly wildcat.ownTests.$(TEST)"
 
+test-all-own: app
+	$(SBT) "testOnly wildcat.ownTests.*" # Won't work because a.out is the same for all
+
 hw: app
 	$(SBT) "runMain wildcat.pipeline.WildcatTop a.out"
 
