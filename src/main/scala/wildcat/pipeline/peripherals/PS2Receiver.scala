@@ -12,6 +12,7 @@ class PS2Receiver extends BlackBox with HasBlackBoxResource {
     val kdata = Input(Bool())
     val keycodeout = Output(UInt(16.W))
   })
+  addResource("/Debouncer.v")
   addResource("/PS2Receiver.v")
 }
 
