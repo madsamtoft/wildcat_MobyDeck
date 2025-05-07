@@ -126,10 +126,17 @@ class WildcatTop(file: String) extends Module {
   val vgaDataReg = RegInit(0.U(32.W))
   val vgaAddressReg = RegInit(0.U(32.W))
   val vgaWriteReg = Reg(Bool())
+  val anyWriteEnable = cpu.io.dmem.wrEnable(0) || cpu.io.dmem.wrEnable(1) || cpu.io.dmem.wrEnable(2) || cpu.io.dmem.wrEnable(3)
   vgaWriteReg := false.B
   video.io.data := vgaDataReg
   video.io.address := vgaAddressReg
   video.io.write := vgaWriteReg
+
+  when ((cpu.io.dmem.wrAddress(31,20) === "xf01".U) && anyWriteEnable) { // VGA
+    vgaDataReg := cpu.io.dmem.wrData
+    vgaAddressReg := cpu.io.dmem.wrAddress
+    vgaWriteReg := true.B
+  }
 
   //
   val ledReg = RegInit(0.U(16.W))
@@ -140,10 +147,6 @@ class WildcatTop(file: String) extends Module {
       tx.io.channel.valid := true.B
     } .elsewhen (cpu.io.dmem.wrAddress(27,16) === 1.U) { // LED
       ledReg := cpu.io.dmem.wrData(15, 0)
-    } .elsewhen (cpu.io.dmem.wrAddress(27,20) === "x01".U) { // VGA
-      vgaDataReg := cpu.io.dmem.wrData
-      vgaAddressReg := cpu.io.dmem.wrAddress
-      vgaWriteReg := true.B
     }
     dmem.io.wrEnable := VecInit(Seq.fill(4)(false.B))
   }
