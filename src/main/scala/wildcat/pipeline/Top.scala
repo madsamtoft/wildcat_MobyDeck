@@ -20,5 +20,5 @@ class Top (file: String) extends Module{
 }
 
 object Top extends App {
-  emitVerilog(new WildcatTop(args(0)), Array("--target-dir", "generated"))
+  emitVerilog(new Top(args(0)), Array("--target-dir", "generated"))
 }
