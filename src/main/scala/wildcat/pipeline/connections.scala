@@ -1,6 +1,18 @@
 package wildcat.pipeline
 
 import chisel3._
+import wildcat.pipeline.peripherals.VGA
+
+class TopIO extends Bundle {
+  val led = Output(UInt(16.W))
+  val tx = Output(UInt(1.W))
+  val rx = Input(UInt(1.W))
+  val sw = Input(UInt(16.W))
+  val btn = Input(UInt(4.W))
+  val PS2_CLK = Input(UInt(1.W))
+  val PS2_DATA = Input(UInt(1.W))
+  val vga = new VGA()
+}
 
 class InstrIO extends Bundle {
   val address = Output(UInt(32.W))

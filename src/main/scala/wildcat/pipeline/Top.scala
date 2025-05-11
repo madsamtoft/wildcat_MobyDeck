@@ -6,16 +6,7 @@ import chisel.lib.uart._
 import wildcat.pipeline.peripherals._
 
 class Top (file: String) extends Module{
-  val io = IO(new Bundle {
-    val led = Output(UInt(16.W))
-    val tx = Output(UInt(1.W))
-    val rx = Input(UInt(1.W))
-    val sw = Input(UInt(16.W))
-    val btn = Input(UInt(4.W))
-    val PS2_CLK = Input(UInt(1.W))
-    val PS2_DATA = Input(UInt(1.W))
-    val vga = new VGA()
-  })
+  val io = IO(new TopIO())
 
   val syncReset = RegNext(RegNext(RegNext(reset)))
   val delBtn = RegNext(RegNext(RegNext(io.btn)))
