@@ -7,7 +7,7 @@ import wildcat.pipeline._
 
 class TestOwn extends AnyFlatSpec with ChiselScalatestTester {
   "_Assembly test" should "pass" in {
-    test(new WildcatTop("a.out")).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
+    test(new WildcatTop("a.out", 100000000, 115200)).withAnnotations(Seq(WriteVcdAnnotation)) { dut =>
       dut.clock.setTimeout(0)
       dut.clock.step(100)
       dut.io.sw.poke(0xDEAD.U)

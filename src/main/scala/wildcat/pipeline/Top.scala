@@ -15,7 +15,7 @@ class Top (file: String, freq: Int, baud: Int) extends Module{
   val delSw = RegNext(RegNext(RegNext(io.sw)))
   val delPS2_CLK = RegNext(RegNext(RegNext(io.PS2_CLK)))
   val delPS2_DATA = RegNext(RegNext(RegNext(io.PS2_DATA)))
-  val delVga = RegNext(RegNext(RegNext(io.vga)))
+  //val delVga = RegNext(RegNext(RegNext(io.vga)))
 
   val wildcat = withReset(syncReset){Module(new WildcatTop(file, freq, baud))}
 
@@ -27,7 +27,7 @@ class Top (file: String, freq: Int, baud: Int) extends Module{
   wildcat.io.sw := delSw
   wildcat.io.PS2_CLK := delPS2_CLK
   wildcat.io.PS2_DATA := delPS2_DATA
-  wildcat.io.vga := delVga
+  wildcat.io.vga <> io.vga
 }
 
 object Top extends App {
