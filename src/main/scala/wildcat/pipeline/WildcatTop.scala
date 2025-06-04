@@ -13,7 +13,7 @@ import wildcat.pipeline.peripherals._
  * Author: Martin Schoeberl (martin@jopdesign.com)
  *
  */
-class WildcatTop(file: String) extends Module {
+class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
 
   val io = IO(new Bundle {
     val led = Output(UInt(16.W))
@@ -75,23 +75,18 @@ class WildcatTop(file: String) extends Module {
   // bit 1 RX data available (RDF)
   // 0xf000_0004 send and receive register
 
-  // LEDs:
-  // 0xf001_0000
+  // LEDs:      0xf001_0000
 
-  // Switches:
-  // 0xf002_0000
+  // Switches:  0xf002_0000
 
-  // Buttons:
-  // 0xf003_0000
+  // Buttons:   0xf003_0000
 
-  //Gamepad (PS2_DATA):
-  //0xf004_0000
+  // PS2 data:  0xf004_0000
 
-  //VGA:
-  //0xf010_0000
+  //VGA:        0xf010_0000
 
-  val tx = Module(new BufferedTx(100000000, 115200))
-  val rx = Module(new Rx(100000000, 115200))
+  val tx = Module(new BufferedTx(100000000, baud))
+  val rx = Module(new Rx(100000000, baud))
   io.tx := tx.io.txd
   rx.io.rxd := io.rx
 
@@ -155,6 +150,6 @@ class WildcatTop(file: String) extends Module {
   io.vga := video.io.vga
 }
 
-object WildcatTop extends App {
-  emitVerilog(new WildcatTop(args(0)), Array("--target-dir", "generated"))
-}
+//object WildcatTop extends App {
+//  emitVerilog(new WildcatTop(args(0), 75000000, 115200), Array("--target-dir", "generated"))
+//}
