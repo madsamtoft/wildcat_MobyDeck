@@ -8,9 +8,9 @@ import wildcat.pipeline.peripherals._
 class Top (file: String, freq: Int, baud: Int) extends Module{
   val io = IO(new TopIO())
   val wiz = Module(new clk_wiz_0)
-  wiz.io.clock_board := clock
+  wiz.io.clock_in := clock
 
-  withClock(wiz.io.clock) {
+  withClock(wiz.io.clock_out) {
     val syncReset = RegNext(RegNext(RegNext(reset)))
     val wildcat = withReset(syncReset){Module(new WildcatTop(file, freq, baud))}
 
