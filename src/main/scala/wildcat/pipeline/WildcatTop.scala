@@ -14,9 +14,7 @@ import wildcat.pipeline.peripherals._
  *
  */
 class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
-
   val io = IO(new TopIO())
-
 
   val (memory, start) = Util.getCode(file)
 
@@ -100,7 +98,7 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
       cpu.io.dmem.rdData := buttonReg
     } .elsewhen(memAddressReg(27,16) === 4.U) { // ps2Data
       //cpu.io.dmem.rdData := ps2_keycode //## ps2_press
-      cpu.io.dmem.rdData := ps2.io.keycodeout(7,0)
+      cpu.io.dmem.rdData := ps2.io.keycodeout(31,24)
     }
   }
 
