@@ -62,14 +62,10 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
   // 0xf000_0004 send and receive register
 
   // LEDs:      0xf001_0000
-
   // Switches:  0xf002_0000
-
   // Buttons:   0xf003_0000
-
   // PS2 data:  0xf004_0000
-
-  //VGA:        0xf010_0000
+  // VGA:       0xf010_0000
 
   val tx = Module(new BufferedTx(freq, baud))
   val rx = Module(new Rx(freq, baud))
