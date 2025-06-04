@@ -7,29 +7,24 @@ import wildcat.pipeline.peripherals._
 
 class Top (file: String, freq: Int, baud: Int) extends Module{
   val io = IO(new TopIO())
+  val wiz = Module(new clk_wiz_0)
+  wiz.io.clock_board := clock
 
-  val syncReset = RegNext(RegNext(RegNext(reset)))
+  withClock(wiz.io.clock) {
+    val syncReset = RegNext(RegNext(RegNext(reset)))
+    val wildcat = withReset(syncReset){Module(new WildcatTop(file, freq, baud))}
 
-  val delRx = RegNext(RegNext(RegNext(io.rx)))
-  val delBtn = RegNext(RegNext(RegNext(io.btn)))
-  val delSw = RegNext(RegNext(RegNext(io.sw)))
-  val delPS2_CLK = RegNext(RegNext(RegNext(io.PS2_CLK)))
-  val delPS2_DATA = RegNext(RegNext(RegNext(io.PS2_DATA)))
-  //val delVga = RegNext(RegNext(RegNext(io.vga)))
-
-  val wildcat = withReset(syncReset){Module(new WildcatTop(file, freq, baud))}
-
-  io.tx := RegNext(RegNext(RegNext(wildcat.io.tx)))
-  io.led := RegNext(RegNext(RegNext(wildcat.io.led)))
-
-  wildcat.io.rx := delRx
-  wildcat.io.btn := delBtn
-  wildcat.io.sw := delSw
-  wildcat.io.PS2_CLK := delPS2_CLK
-  wildcat.io.PS2_DATA := delPS2_DATA
-  wildcat.io.vga <> io.vga
+    io.led := wildcat.io.led
+    io.tx := wildcat.io.tx
+    wildcat.io.rx := RegNext(RegNext(io.rx))
+    wildcat.io.sw := RegNext(RegNext(io.sw))
+    wildcat.io.btn := RegNext(RegNext(io.btn))
+    wildcat.io.PS2_CLK := RegNext(RegNext(io.PS2_CLK))
+    wildcat.io.PS2_DATA := RegNext(RegNext(io.PS2_DATA))
+    io.vga <> wildcat.io.vga
+  }
 }
 
 object Top extends App {
-  emitVerilog(new Top(args(0), 100000000, 115200), Array("--target-dir", "generated"))
+  emitVerilog(new Top(args(0), 75000000, 115200), Array("--target-dir", "generated"))
 }
