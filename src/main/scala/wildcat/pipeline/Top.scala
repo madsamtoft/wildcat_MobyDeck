@@ -17,7 +17,7 @@ class Top (file: String, freq: Int, baud: Int) extends Module{
   val delPS2_DATA = RegNext(RegNext(RegNext(io.PS2_DATA)))
   val delVga = RegNext(RegNext(RegNext(io.vga)))
 
-  val wildcat = withReset(syncReset){Module(new WildcatTop(file, 75000000, 115200))}
+  val wildcat = withReset(syncReset){Module(new WildcatTop(file, freq, baud))}
 
   io.tx := RegNext(RegNext(RegNext(wildcat.io.tx)))
   io.led := RegNext(RegNext(RegNext(wildcat.io.led)))
@@ -31,5 +31,5 @@ class Top (file: String, freq: Int, baud: Int) extends Module{
 }
 
 object Top extends App {
-  emitVerilog(new Top(args(0), 75000000, 115200), Array("--target-dir", "generated"))
+  emitVerilog(new Top(args(0), 100000000, 115200), Array("--target-dir", "generated"))
 }
