@@ -18,7 +18,7 @@ class WildcatTestTop(file: String) extends Module {
     val rx = Input(UInt(1.W))
     val stop = Output(Bool())
   })
-  val cpuTop = Module(new WildcatTop(file))
+  val cpuTop = Module(new WildcatTop(file, 100000000, 115200))
 
   io.regFile := DontCare
   BoringUtils.bore(cpuTop.cpu.debugRegs, Seq(io.regFile))

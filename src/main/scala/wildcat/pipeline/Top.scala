@@ -5,20 +5,26 @@ import wildcat.Util
 import chisel.lib.uart._
 import wildcat.pipeline.peripherals._
 
-class Top (file: String) extends Module{
+class Top (file: String, freq: Int, baud: Int) extends Module{
   val io = IO(new TopIO())
+  val wiz = Module(new clk_wiz_0)
+  wiz.io.clock_in := clock
 
-  val syncReset = RegNext(RegNext(RegNext(reset)))
-  val delBtn = RegNext(RegNext(RegNext(io.btn)))
-  val delSw = RegNext(RegNext(RegNext(io.sw)))
+  withClock(wiz.io.clock_out) {
+    val syncReset = RegNext(RegNext(RegNext(reset)))
+    val wildcat = withReset(syncReset){Module(new WildcatTop(file, freq, baud))}
 
-  val wildcat = withReset(syncReset){Module(new WildcatTop(file))}
-
-  io <> wildcat.io
-  wildcat.io.btn := delBtn
-  wildcat.io.sw := delSw
+    io.led := wildcat.io.led
+    io.tx := wildcat.io.tx
+    wildcat.io.rx := RegNext(RegNext(io.rx))
+    wildcat.io.sw := RegNext(RegNext(io.sw))
+    wildcat.io.btn := RegNext(RegNext(io.btn))
+    wildcat.io.PS2_CLK := RegNext(RegNext(io.PS2_CLK))
+    wildcat.io.PS2_DATA := RegNext(RegNext(io.PS2_DATA))
+    io.vga <> wildcat.io.vga
+  }
 }
 
 object Top extends App {
-  emitVerilog(new Top(args(0)), Array("--target-dir", "generated"))
+  emitVerilog(new Top(args(0), 75000000, 115200), Array("--target-dir", "generated"))
 }
