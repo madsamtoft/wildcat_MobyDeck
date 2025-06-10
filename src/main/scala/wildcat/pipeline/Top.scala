@@ -26,5 +26,5 @@ class Top (file: String, freq: Int, baud: Int) extends Module{
 }
 
 object Top extends App {
-  emitVerilog(new Top(args(0), 75000000, 115200), Array("--target-dir", "generated"))
+  emitVerilog(new Top(args(0), 70000000, 115200), Array("--target-dir", "generated"))
 }
