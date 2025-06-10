@@ -45,3 +45,23 @@ build/
 
 ### Scala ###
 .bsp/
+/.idea/.gitignore
+/.idea/.name
+/project/build.properties
+/data0.hex
+/data1.hex
+/data2.hex
+/data3.hex
+/generated/firrtl_black_box_resource_files.f
+/.idea/misc.xml
+/.idea/sbt.xml
+/.idea/scala_compiler.xml
+/.idea/scala_settings.xml
+/generated/Top.anno.json
+/generated/Top.fir
+/generated/Top.ScratchPadMem.MEM.v
+/generated/Top.ScratchPadMem.MEM_1.v
+/generated/Top.ScratchPadMem.MEM_2.v
+/generated/Top.ScratchPadMem.MEM_3.v
+/generated/Top.v
+/.idea/vcs.xml
