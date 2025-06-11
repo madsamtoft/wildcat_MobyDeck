@@ -18,11 +18,11 @@ class Top (file: String, freq: Int, baud: Int) extends Module {
 
     io.led := wildcat.io.led
     io.tx := wildcat.io.tx
-    wildcat.io.rx := RegNext(RegNext(io.rx))
-    wildcat.io.sw := RegNext(RegNext(io.sw))
-    wildcat.io.btn := RegNext(RegNext(io.btn))
-    wildcat.io.PS2_CLK := RegNext(RegNext(io.PS2_CLK))
-    wildcat.io.PS2_DATA := RegNext(RegNext(io.PS2_DATA))
+    wildcat.io.rx := RegNext(RegNext(RegNext(io.rx)))
+    wildcat.io.sw := RegNext(RegNext(RegNext(io.sw)))
+    wildcat.io.btn := RegNext(RegNext(RegNext(io.btn)))
+    wildcat.io.PS2_CLK := RegNext(RegNext(RegNext(io.PS2_CLK)))
+    wildcat.io.PS2_DATA := RegNext(RegNext(RegNext(io.PS2_DATA)))
     io.vga <> wildcat.io.vga
   }
 }
