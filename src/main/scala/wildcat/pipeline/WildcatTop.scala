@@ -1,6 +1,7 @@
 package wildcat.pipeline
 
 import chisel3._
+import chisel3.util._
 import wildcat.Util
 import chisel.lib.uart._
 import wildcat.pipeline.peripherals._
@@ -30,26 +31,18 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
   cpu.io.imem.stall := imem.io.stall
   // TODO: stalling
 
-
-  //Testing ps2 module :)
+  //PS2 MODULE
   val ps2 = Module(new PS2Receiver)
+  val ps2_keycode = RegInit(0.U(8.W))
+  ps2_keycode := ps2.io.keycodeout
   ps2.io.clk := clock
   ps2.io.kdata := io.PS2_DATA
   ps2.io.kclk := io.PS2_CLK
 
-  /* !!! This MIGHT be needed later on !!!
-  val ps2_keycode = RegInit(0.U(8.W))
-  val ps2_press = RegInit(false.B)
-  ps2_keycode := ps2.io.keycodeout(7,0)
+  //TIMER MODULE
+  val timer = Module(new timer(freq))
+  timer.io.start_timer := false.B
 
-
-  when(ps2_keycode === 0xF0.U) {
-    ps2_press := false.B
-    ps2_keycode := 0x00.U
-  } .elsewhen(ps2_keycode =/= 0x00.U) {
-    ps2_press := true.B
-  }
-  */
 
   // Here IO stuff
   // IO is mapped ot 0xf000_0000
@@ -65,6 +58,8 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
   // Switches:  0xf002_0000
   // Buttons:   0xf003_0000
   // PS2 data:  0xf004_0000
+  // TimerStart:0xf005_0000
+  // TimerEnd:  0xf005_0001
   // VGA:       0xf010_0000
 
   val tx = Module(new BufferedTx(freq, baud))
@@ -93,8 +88,9 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
     } .elsewhen(memAddressReg(27,16) === 3.U) { // Buttons
       cpu.io.dmem.rdData := buttonReg
     } .elsewhen(memAddressReg(27,16) === 4.U) { // ps2Data
-      //cpu.io.dmem.rdData := ps2_keycode //## ps2_press
-      cpu.io.dmem.rdData := ps2.io.keycodeout(7,0)
+      cpu.io.dmem.rdData := ps2_keycode
+    } .elsewhen(memAddressReg === "xf0050001".U) { // timer
+      cpu.io.dmem.rdData := timer.io.end_timer
     }
   }
 
@@ -114,6 +110,9 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
     vgaDataReg := cpu.io.dmem.wrData
     vgaAddressReg := cpu.io.dmem.wrAddress
     vgaWriteReg := true.B
+  }
+  when ((cpu.io.dmem.wrAddress === "xf0050000".U) && anyWriteEnable) {
+    timer.io.start_timer := true.B
   }
 
   //
@@ -136,3 +135,18 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
 object WildcatTop extends App {
   emitVerilog(new WildcatTop(args(0), 100000000, 115200), Array("--target-dir", "generated"))
 }
+
+
+/* !!! This MIGHT be needed later on !!!
+  val ps2_keycode = RegInit(0.U(8.W))
+  val ps2_press = RegInit(false.B)
+  ps2_keycode := ps2.io.keycodeout(7,0)
+
+
+  when(ps2_keycode === 0xF0.U) {
+    ps2_press := false.B
+    ps2_keycode := 0x00.U
+  } .elsewhen(ps2_keycode =/= 0x00.U) {
+    ps2_press := true.B
+  }
+  */

@@ -1,18 +1,20 @@
 package wildcat.pipeline
 
 import chisel3._
-import wildcat.Util
+import chisel3.util._
 import chisel.lib.uart._
 import wildcat.pipeline.peripherals._
 
-class Top (file: String, freq: Int, baud: Int) extends Module{
+class Top (file: String, freq: Int, baud: Int) extends Module {
   val io = IO(new TopIO())
   val wiz = Module(new clk_wiz_0)
   wiz.io.clock_in := clock
 
   withClock(wiz.io.clock_out) {
     val syncReset = RegNext(RegNext(RegNext(reset)))
-    val wildcat = withReset(syncReset){Module(new WildcatTop(file, freq, baud))}
+    val wildcat = withReset(syncReset) {
+      Module(new WildcatTop(file, freq, baud))
+    }
 
     io.led := wildcat.io.led
     io.tx := wildcat.io.tx
@@ -26,5 +28,5 @@ class Top (file: String, freq: Int, baud: Int) extends Module{
 }
 
 object Top extends App {
-  emitVerilog(new Top(args(0), 70000000, 115200), Array("--target-dir", "generated"))
+  emitVerilog(new Top(args(0), 60000000, 115200), Array("--target-dir", "generated"))
 }
