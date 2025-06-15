@@ -9,6 +9,8 @@ class timer(freq: Int) extends Module{
     val end_timer = Output(Bool())
   })
 
+  val CLOCK_CYCLES_MS = (freq / 1000).U
+
   val count_bool = RegInit(false.B)
   val end_bool = RegInit(false.B)
   val target_count = RegInit(0.U(32.W))
@@ -17,7 +19,7 @@ class timer(freq: Int) extends Module{
   when (io.target_count =/= 0.U) {
     count_bool := true.B
     end_bool := false.B
-    target_count := io.target_count
+    target_count := io.target_count * CLOCK_CYCLES_MS
   }
 
   when(count_bool) {
