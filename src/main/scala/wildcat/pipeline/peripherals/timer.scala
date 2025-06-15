@@ -5,26 +5,28 @@ import chisel3.util._
 
 class timer(freq: Int) extends Module{
   val io = IO(new Bundle{
-    val start_timer = Input(UInt(32.W))
-    val end_timer = Output(UInt(32.W))
+    val target_count = Input(UInt(32.W))
+    val end_timer = Output(Bool())
   })
 
-  //val PER_SECOND = 60
-  val MAX_COUNT = 10000 //(freq/PER_SECOND)
-  val count_bool = RegInit(0.U(32.W))
-  val end_bool = RegInit(0.U(32.W))
-  val count_reg = RegInit(0.U(log2Up(MAX_COUNT).W))
-  when (io.start_timer(0)) {
-    count_bool := 1.U
-    end_bool := 0.U
+  val count_bool = RegInit(false.B)
+  val end_bool = RegInit(false.B)
+  val target_count = RegInit(0.U(32.W))
+  val count_reg = RegInit(0.U(32.W))
+
+  when (io.target_count =/= 0.U) {
+    count_bool := true.B
+    end_bool := false.B
+    target_count := io.target_count
   }
 
-  when(count_bool(0)) {
+  when(count_bool) {
     count_reg := count_reg + 1.U
-    when(count_reg === MAX_COUNT.asUInt) {
+    when(count_reg === target_count) {
       count_reg := 0.U
-      count_bool := 0.U
-      end_bool := 1.U
+      count_bool := false.B
+      end_bool := true.B
+      target_count := 0.U
     }
   }
 

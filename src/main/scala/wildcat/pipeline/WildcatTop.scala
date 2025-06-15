@@ -41,7 +41,7 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
 
   //TIMER MODULE
   val timer = Module(new timer(freq))
-  timer.io.start_timer := false.B
+  timer.io.target_count := 0.U
 
 
   // Here IO stuff
@@ -59,7 +59,7 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
   // Buttons:   0xf003_0000
   // PS2 data:  0xf004_0000
   // TimerStart:0xf005_0000
-  // TimerEnd:  0xf005_0001
+  // TimerEnd:  0xf005_0004
   // VGA:       0xf010_0000
 
   val tx = Module(new BufferedTx(freq, baud))
@@ -89,7 +89,7 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
       cpu.io.dmem.rdData := buttonReg
     } .elsewhen(memAddressReg(27,16) === 4.U) { // ps2Data
       cpu.io.dmem.rdData := ps2_keycode
-    } .elsewhen(memAddressReg === "xf0050001".U) { // timer
+    } .elsewhen(memAddressReg === "xf0050004".U) { // timer
       cpu.io.dmem.rdData := timer.io.end_timer
     }
   }
@@ -112,7 +112,7 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
     vgaWriteReg := true.B
   }
   when ((cpu.io.dmem.wrAddress === "xf0050000".U) && anyWriteEnable) {
-    timer.io.start_timer := true.B
+    timer.io.target_count := cpu.io.dmem.wrData
   }
 
   //
@@ -131,6 +131,7 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
   io.led := RegNext(ledReg)
   io.vga := video.io.vga
 }
+
 
 object WildcatTop extends App {
   emitVerilog(new WildcatTop(args(0), 100000000, 115200), Array("--target-dir", "generated"))
