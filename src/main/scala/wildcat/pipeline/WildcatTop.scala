@@ -90,7 +90,7 @@ class WildcatTop(file: String, freq: Int, baud: Int) extends Module {
     } .elsewhen(memAddressReg(27,16) === 4.U) { // ps2Data
       cpu.io.dmem.rdData := ps2_keycode
     } .elsewhen(memAddressReg === "xf0050004".U) { // timer
-      cpu.io.dmem.rdData := timer.io.end_timer
+      cpu.io.dmem.rdData := timer.io.done
     }
   }
 
