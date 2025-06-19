@@ -18,7 +18,7 @@ class Top (file: String, freq: Int, baud: Int) extends Module {
 
     io.led := wildcat.io.led
     io.tx := wildcat.io.tx
-    wildcat.io.rx := RegNext(RegNext(RegNext(io.rx)))
+    wildcat.io.rx := io.rx
     wildcat.io.sw := RegNext(RegNext(RegNext(io.sw)))
     wildcat.io.btn := RegNext(RegNext(RegNext(io.btn)))
     wildcat.io.PS2_CLK := RegNext(RegNext(RegNext(io.PS2_CLK)))
